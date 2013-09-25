@@ -6,8 +6,8 @@ if (typeof String.prototype.startsWith != 'function') {
 }
 
 function MustacheRDF(rdf, ns) {
-  this.rdf = rdf;
-  this.ns = ns;
+  this.rdf = rdf; // Javascript array of Objects { subject:.., predicate:.., object:...}
+  this.ns = ns; // JS object of namespaces to be used { "dc:" : "http://purl.org/dc/elements/1.1/"}
 
   this.reg = /{{(.*?)}}/g; // this is for curly brackets
   
@@ -16,7 +16,7 @@ function MustacheRDF(rdf, ns) {
 
   this.loop = /<div\b[^>]*>((?!<\/?div\b).)*<div/g;
 
-  this.init();
+  //this.init();
 }
 MustacheRDF.prototype.init = function() {
   var that = this;

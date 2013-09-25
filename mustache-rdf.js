@@ -14,10 +14,52 @@ function MustacheRDF(rdf, ns) {
   this.loopBlock = /{{#(.*?)}}([\s\S]*?){{\/}}/g;
   this.singleBlock = /{{\.}}/g;
 
-  this.loop = /<div\b[^>]*>((?!<\/?div\b).)*<div/g;
+  this.loop = /{{#([^}\s]+)(.*?)}}(?=([\s\S]*?){{\/\1}})/g;
 
   //this.init();
 }
+MustacheRDF.prototype.render = function(template) {
+  var that = this;
+
+  var tmpl = template.replace(this.loopBlock, function(){
+    var htmlToLoop = arguments[2];
+    var triple = arguments[1]; 
+
+    var html = '';
+    var obj = that.findPattern(triple);
+    var arr = obj.matches;
+
+    for(var i in arr) {
+      html += htmlToLoop.replace(that.reg, function() {
+        // {{?s rdfs:label ?label}} -> {{cco:xx rdfs:label ?label}}
+        // transform the variable found into full uri
+        var triple = arguments[1]; 
+        if(triple == '.') {
+          return arr[i];
+        } else {
+          triple = triple.replace(obj.argName, arr[i]);
+
+          var a = that.findPattern(triple).matches;
+          return a[0];
+        }
+      });
+      
+    }
+    return html;
+  });
+
+  // replace all instance of curly
+  tmpl = tmpl.replace(this.reg, function() {
+    var triple = arguments[1]; 
+
+    var arr = that.findPattern(triple).matches;
+    
+    return arr[0];
+  });
+
+  return tmpl;
+};
+
 MustacheRDF.prototype.init = function() {
   var that = this;
 

@@ -23,330 +23,131 @@
 
 $(function() {
 
+  /*
   $('div.test script').each(function() {
     $this = $(this);
     $this.after('<textarea>'+ $this.html() +'</textarea>');
   });
+  */
 
   // run test button
   $('.runTest').click(function(e) {
     $this = $(this);
     $test = $this.parent();
 
-    var rdfTurtleInput = $test.find('script.rdf-input').html();
+    var rdfTurtleInput = $test.find('.rdf-input').val();
 
     // parse Turtle
     var turtle = new ParseTurtle();
-    var rdfJs = turtle.parse(rdfTurtleInput);
+    var rdf = turtle.parse(rdfTurtleInput);
     var ns = turtle.ns; // namespace
 
     // get template
-    var template = $test.find('script.template').html();
+    var template = $test.find('.template').val();
 
     // Mustache it!
-    var m = new MustacheRDF(rdfJs, ns);
+    var m = new MustacheRDF(rdf, ns);
     var output = m.render(template);
 
     // add output to textarea
-    $test.find('textarea.actual-output').val(output);
+    $test.find('.actual-output').val(output);
+
+
+    // compare expected with actual
+    var expectedOutput = $.trim($test.find('.expected-output').val());
+    var actualOutput = $.trim(output);
+
+    // turn green or red
+    if(expectedOutput == actualOutput) {
+      $test.css({ background: 'green' });
+    } else {
+      $test.css({ background: 'red' });
+    }
   
     e.preventDefault();
     e.stopPropagation();
+  });
+
+  $('.runAll').click(function() {
+    $('.runTest').click();
   });
   
 });
 </script>
 
 <h2>Mustache RDF Tests</h2>
+<input type="button" value="Run all tests" class="runAll" />
+<br><br>
+
 <div class="test">
 
   <div>
     RDF Turtle input<br>
-    <script class="rdf-input" type="text/template">
-@prefix cco: <http://data.agrobiodiversity.org/cco#>.
+    <textarea class="rdf-input">
+@prefix schema: <http://schema.org/>.
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
-@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
-@prefix owl:  <http://www.w3.org/2002/07/owl#> .
-@prefix dc:      <http://purl.org/dc/elements/1.1/> .
-   
-cco:  a owl:Ontology ;
-      dc:created "2013/09/23 12:00:00";
-      dc:date "2013/09/23 12:00:00";
-      dc:description """The Crop Characterization Ontology provides main concepts and properties for describing the characteristics of various crops. These concepts enable an easy and quick discrimination between phenotypes. They are generally highly heritable, can be easily seen by the eye and are equally expressed in all environments. In addition, these may include a limited number of additional traits thought desirable by a consensus of users of the particular crop.""" ;
-      dc:title "The Crop Characterization Ontology" ;
-      dc:hasVersion "Revision: 0.1" ;
-      dc:contributor "Dr Silvio Belalcazar","Dr F. Carreel","Ching-Yan Tang","Dr Jeff Daniells","Prof. Bruno Delvaux","Mr Guy Evers","Dr Victor Galan Sauco","Dr Ricardo Goenaga","Prof. Oscar Haddad","Dr Yair Isralei","Mr Christophe Jenny","Mrs Deborah Karamura","Dr Emmanuel Lahav","Mr Christian Lavigne","Mr Thierry Lescot","Dr Rodomiro Ortiz","Mr Orlando C. Pascua","Mr Xavier Perrier","Dr Franklin Rosales","Ing. Irelio Sanchez Ramos","Prof Rony Swennen","Mr Hughes Tezenas du Montcel","Dr Kodjo Tomekpe", "Ir. Ines Van den houwe";
-      dc:acknowledgments """IPGRI-INIBAP and CIRAD wish to place on record their sincere thanks to the numerous Musa workers around the world who have contributed directly or indirectly to the development of the Descriptors for banana. Mr H. Tezenas du Montcel, Mr C. Jenny and Dr X. Perrier from CIRAD-FLHOR have contributed to the development of the characterization form, which has been translated into English by Ms S. Sharrock (IBPGR) and into Spanish by Mr T. Lescot (CIRAD). Translation from French into English has been performed by Dr D.R. Jones, Ms E Arnaud and Dr J.P. Horry. Ms Adriana Alercia coordinated and supervised the text up to the pre-publication stage and provided technical advice. Ms Linda Sears edited the text and Ms Patrizia Tazza drew the cover, some illustrations, and prepared the layout. Scientific direction was provided by Dr Jean-Pierre Horry. Mr Paul Stapleton managed the production of the publication. Luca Matteis produced the underlying data model and the semantics of the ontology.""";
-    foaf:page "http://data.agrobiodiversity.org/cco";
-    rdfs:seeAlso "http://www.bioversityinternational.org/e-library/publications/categories/descriptors/"
-     .
+@prefix foaf: <http://xmlns.com/foaf/0.1/>.
+@prefix dct: <http://purl.org/dc/terms/>.
 
-cco:Characterization a rdfs:Class;
-    rdfs:label "Characterization of crops"
+schema:Thing a rdfs:Class;
+    rdfs:label "Thing"@en;
+    rdfs:comment ""@en;
+    rdfs:isDefinedBy <http://schema.org/Thing>
     .
-
-cco:Musa a rdfs:Class;
-    rdfs:label "Musa spp.";
-    rdfs:subClassOf cco:Characterization
+schema:Action a rdfs:Class;
+    rdfs:label "Action"@en;
+    rdfs:comment ""@en;
+    rdfs:subClassOf schema:Thing;
+    rdfs:isDefinedBy <http://schema.org/Action>
     .
-        
-cco:leafHabitMusa a rdf:Property;
-    rdfs:label "Leaf habit"@en;
-    rdfs:comment """1 Erect
-2 Intermediate
-3 Drooping
-4 Other (e.g. very drooping, specify in descriptor Notes, 6.8)"""@en;
-    rdfs:domain cco:Musa;
-    rdfs:range xsd:string;
-    cco:section "6.1.1";
-    foaf:depiction <http://www.agrobiodiversity.org/files/leafHabit.png>
+schema:AchieveAction a rdfs:Class;
+    rdfs:label "Achieve Action"@en;
+    rdfs:comment ""@en;
+    rdfs:subClassOf schema:Action;
+    rdfs:isDefinedBy <http://schema.org/AchieveAction>
     .
-    
-cco:dwarfismMusa a rdf:Property;
-    rdfs:label "Dwarfism"@en;
-    rdfs:comment """1 Normal: leaves not overlapped and leaf ratio inferior to 2.5
-2 Dwarf type: leaves strongly overlapped and leaf ratio superior
-to 2.5"""@en;
-    rdfs:domain cco:Musa;
-    rdfs:range xsd:string;
-    cco:section "6.1.2"
+schema:LoseAction a rdfs:Class;
+    rdfs:label "Lose Action"@en;
+    rdfs:comment ""@en;
+    rdfs:subClassOf schema:AchieveAction;
+    rdfs:isDefinedBy <http://schema.org/LoseAction>
     .
-    
-cco:pseudostemHeightMusa a rdf:Property;
-    rdfs:label "Pseudostem height [m]"@en;
-    rdfs:comment """Recorded from the base of pseudostem to emerging point of the peduncle
-1 ≤2
-2 2.1 to 2.9
-3 ≥3"""@en;
-    rdfs:domain cco:Musa;
-    rdfs:range xsd:string;
-    cco:section "6.2.1";
-    foaf:depiction <http://www.agrobiodiversity.org/files/PseudostemSuckers.png>
-    .
-    
-    
-cco:pseudostemAspectMusa a rdf:Property;
-    rdfs:label "Pseudostem aspect"@en;
-    rdfs:comment """Determined by the circumference at 100 cm
-1 Slender
-2 Normal
-3 Robust"""@en;
-    rdfs:domain cco:Musa;
-    rdfs:range xsd:string;
-    cco:section "6.2.2";
-    foaf:depiction <http://www.agrobiodiversity.org/files/PseudostemSuckers.png>
-    .
-    
-    
-cco:pseudostemColourMusa a rdf:Property;
-    rdfs:label "Pseudostem colour"@en;
-    rdfs:comment """Recorded without removing the external sheaths. The colour of oldest dry sheaths should not be considered.
-1 Green-yellow
-2 Medium green
-3 Green
-4 Dark green
-5 Green-red
-6 Red
-7 Red-purple
-8 Blue
-9 Chimerical
-10 Other"""@en;
-    rdfs:domain cco:Musa;
-    rdfs:range xsd:string;
-    cco:section "6.2.3";
-    foaf:depiction <http://www.agrobiodiversity.org/files/PseudostemSuckers.png>
-    .
-    
-    
-cco:pseudostemAppearanceMusa a rdf:Property;
-    rdfs:label "Pseudostem appearance"@en;
-    rdfs:comment """Recorded as in cco:pseudostemColourMusa
-1 Dull (waxy)
-2 Shiny (not waxy)"""@en;
-    rdfs:domain cco:Musa;
-    rdfs:range xsd:string;
-    cco:section "6.2.4";
-    foaf:depiction <http://www.agrobiodiversity.org/files/PseudostemSuckers.png>
-    .
-    
-    
-cco:predominantUnderlyingColourPseudostemMusa a rdf:Property;
-    rdfs:label "Predominant underlying colour of the pseudostem"@en;
-    rdfs:comment """Remove the outermost sheath from the pseudostem and look at the exposed surface
-of the underlying pseudostem. The values 5 (pink-purple), 6 (red-purple) and 7
-(purple) must be chosen only if the pigmentation is uniform, and green tinges are
-not observed.
-1 Watery green
-2 Light green
-3 Green
-4 Cream
-5 Pink-purple
-6 Red-purple
-7 Purple
-8 Other"""@en;
-    rdfs:domain cco:Musa;
-    rdfs:range xsd:string;
-    cco:section "6.2.5";
-    foaf:depiction <http://www.agrobiodiversity.org/files/PseudostemSuckers.png>
-    .
-    
-cco:pigmentationUnderlyingPseudostemMusa a rdf:Property;
-    rdfs:label "Pigmentation of the underlying pseudostem"@en;
-    rdfs:comment """Record the tinge of pigmentation, even if it is only noticeable in places.
-1 Pink-purple
-2 Red
-3 Purple
-4 Other"""@en;
-    rdfs:domain cco:Musa;
-    rdfs:range xsd:string;
-    cco:section "6.2.6";
-    foaf:depiction <http://www.agrobiodiversity.org/files/PseudostemSuckers.png>
-    .
-    
-    
-
-cco:sapColourMusa a rdf:Property;
-    rdfs:label "Sap colour"@en;
-    rdfs:comment """Cut the external sheath of pseudostem and record the characteristics of the sap.
-1 Watery
-2 Milky
-3 Red-purple
-4 Other"""@en;
-    rdfs:domain cco:Musa;
-    rdfs:range xsd:string;
-    cco:section "6.2.7"
-    .
-    
-    
-cco:waxLeafSheathsMusa a rdf:Property;
-    rdfs:label "Wax on leaf sheaths"@en;
-    rdfs:comment """1 Very little or no visible sign of wax
-2 Very few wax
-3 Moderately waxy
-4 Very waxy"""@en;
-    rdfs:domain cco:Musa;
-    rdfs:range xsd:string;
-    cco:section "6.2.8"
-    .
-    
-    
-cco:numberOfSuckersMusa a rdf:Property;
-    rdfs:label "Number of suckers"@en;
-    rdfs:comment """Record the number of suckers from soil level to point of emergence of the last leaf
-(>30 cm height). Recorded only if no desuckering has taken place"""@en;
-    rdfs:domain cco:Musa;
-    rdfs:range xsd:string;
-    cco:section "6.2.9"
-    .
-    
-cco:developmentOfSuckersMusa a rdf:Property;
-    rdfs:label "Development of suckers"@en;
-    rdfs:comment """In relation to the parent plant. Observed on the tallest sucker. Recorded at harvest
-time
-1 Taller than parent plant
-2 More than 3/4 of the height of the parent plant
-3 Between 1/4 and 3/4 of the height of the parent plant
-4 Inhibited"""@en;
-    rdfs:domain cco:Musa;
-    rdfs:range xsd:string;
-    cco:section "6.2.10"
-    .
-
-cco:positionOfSuckersMusa a rdf:Property;
-    rdfs:label "Position of suckers"@en;
-    rdfs:comment """1 Far from parent plant (emerging >50 cm from parent plant)
-2 Close to parent (vertical growth)
-3 Close to parent (growing at an angle)"""@en;
-    rdfs:domain cco:Musa;
-    rdfs:range xsd:string;
-    cco:section "6.2.11"
-    .
-cco:blotchesPetioleBaseMusa a rdf:Property;
-    rdfs:label "Blotches at the petiole base"@en;
-    rdfs:comment """Recorded on the third, fully unfolded leaf counting down from the top of the plant.
-    
-1 Sparse blotching
-2 Small blotches
-3 Large blotches
-4 Extensive pigmentation
-5 Without pigmentation"""@en;
-    rdfs:domain cco:Musa;
-    rdfs:range xsd:string;
-    cco:section "6.3.1";
-    foaf:depiction <http://www.agrobiodiversity.org/files/PetioleMidribLeaf.png>
-    .
-    
-    
-cco:blotchesColourMusa a rdf:Property;
-    rdfs:label "Blotches colour"@en;
-    rdfs:comment """1 Brown
-2 Dark brown
-3 Brown-black
-4 Black-purple
-5 Other"""@en;
-    rdfs:domain cco:Musa;
-    rdfs:range xsd:string;
-    cco:section "6.3.2";
-    foaf:depiction <http://www.agrobiodiversity.org/files/PetioleMidribLeaf.png>
-    .
-    
-cco:petioleCanalLeafIIIMusa a rdf:Property;
-    rdfs:label "Petiole canal leaf III"@en;
-    rdfs:comment """Leaf III is the third leaf counted from the last leaf (leaf I) produced before bunch
-emergence. Cut the petiole half way between the pseudostem and the leaf blade
-and examine the cross section.
-
-1 Open with margins spreading
-2 Wide with erect margins
-3 Straight with erect margins
-4 Margins curved inward
-5 Margins overlapping"""@en;
-    rdfs:domain cco:Musa;
-    rdfs:range xsd:string;
-    cco:section "6.3.3";
-    foaf:depiction <http://www.agrobiodiversity.org/files/petioleCanalLeafIIIMusa.png>
-    .
-
-
-cco:petioleMarginsMusa a rdf:Property;
-    rdfs:label "Petiole margins"@en;
-    rdfs:comment """1 Winged and undulating
-2 Winged and not clasping the pseudostem
-3 Winged and clasping the pseudostem
-4 Not winged and clasping the pseudostem
-5 Not winged and not clasping the pseudostem"""@en;
-    rdfs:domain cco:Musa;
-    rdfs:range xsd:string;
-    cco:section "6.3.4"
-    .
-    </script>
+    </textarea>
   </div>
   <div>
     Template<br>
-    <script class="template"type="text/template">
+    <textarea class="template">
 {{#?s a rdfs:Class}}
-<div class="specterm" id="{{.}}"><h3>Class: {{?s rdfs:label ?label}}</h3>
-   {{?s rdfs:label ?label}}
-   <br><br>
-
-  <b>is domain of:</b>
-
-  <ul>
-  {{#?prop rdfs:domain ?s}}
-    <li><a href="{{?prop rdfs:label ?label}}">{{?prop rdfs:label ?label}}</a></li>
-  {{/?prop}}
-  </ul>
-
+<div id="{{.}}"><h3>Class: {{?s rdfs:label ?label}}</h3>
+   {{?s rdfs:subClassOf ?subclass}}
 </div>
-{{/?s}}
-    </script>
+{{/}}
+    </textarea>
   </div>
   <div>
     Expected output<br>
-    <script class="expected-output" type="text/template">
-    </script>
+    <textarea class="expected-output">
+
+<div id="http://schema.org/Thing"><h3>Class: Thing</h3>
+   undefined
+</div>
+
+<div id="http://schema.org/Action"><h3>Class: Action</h3>
+   http://schema.org/Thing
+</div>
+
+<div id="http://schema.org/AchieveAction"><h3>Class: Achieve Action</h3>
+   http://schema.org/Action
+</div>
+
+<div id="http://schema.org/LoseAction"><h3>Class: Lose Action</h3>
+   http://schema.org/AchieveAction
+</div>
+
+    </textarea>
   </div>
   <div>
     Actual output<br>
@@ -356,8 +157,88 @@ cco:petioleMarginsMusa a rdf:Property;
   <input class="runTest" type="button" value="Run test" />
   <hr />
 
+</div> <!-- /test -->
+
+
+<div class="test">
+
+  <div>
+    RDF Turtle input<br>
+    <textarea class="rdf-input">
+@prefix schema: <http://schema.org/>.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix owl: <http://www.w3.org/2002/07/owl#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix foaf: <http://xmlns.com/foaf/0.1/>.
+@prefix dct: <http://purl.org/dc/terms/>.
+
+schema:Thing a rdfs:Class;
+    rdfs:label "Thing"@en;
+    rdfs:comment ""@en;
+    rdfs:isDefinedBy <http://schema.org/Thing>
+    .
+schema:Action a rdfs:Class;
+    rdfs:label "Action"@en;
+    rdfs:comment ""@en;
+    rdfs:subClassOf schema:Thing;
+    rdfs:isDefinedBy <http://schema.org/Action>
+    .
+schema:AchieveAction a rdfs:Class;
+    rdfs:label "Achieve Action"@en;
+    rdfs:comment ""@en;
+    rdfs:subClassOf schema:Action;
+    rdfs:isDefinedBy <http://schema.org/AchieveAction>
+    .
+schema:LoseAction a rdfs:Class;
+    rdfs:label "Lose Action"@en;
+    rdfs:comment ""@en;
+    rdfs:subClassOf schema:AchieveAction;
+    rdfs:isDefinedBy <http://schema.org/LoseAction>
+    .
+    </textarea>
+  </div>
+  <div>
+    Template<br>
+    <textarea class="template">
+{{#?s a rdfs:Class}}
+<div id="{{.}}"><h3>Class: {{?s rdfs:label ?label}}</h3>
+   {{?s rdfs:subClassOf ?subclass}}
+</div>
+{{/}}
+    </textarea>
+  </div>
+  <div>
+    Expected output<br>
+    <textarea class="expected-output">
+
+<div id="http://schema.org/Thing"><h3>Class: Thing</h3>
+   undefined
 </div>
 
+<div id="http://schema.org/Action"><h3>Class: Action</h3>
+   http://schema.org/Thing
+</div>
+
+<div id="http://schema.org/AchieveAction"><h3>Class: Achieve Action</h3>
+   http://schema.org/Action
+</div>
+
+<div id="http://schema.org/LoseAction"><h3>Class: Lose Action</h3>
+   http://schema.org/AchieveAction
+</div>
+
+    </textarea>
+  </div>
+  <div>
+    Actual output<br>
+    <textarea class="actual-output"></textarea>
+  </div>
+  <br>
+  <input class="runTest" type="button" value="Run test" />
+  <hr />
+
+</div> <!-- /test -->
 
 </body>
 </html>
